@@ -33,4 +33,12 @@ public class Counter<T> {
     public List<T> getKeysAsList() {
         return new LinkedList<>(getKeySet());
     }
+    
+    public void addCounts(Counter<T> toAdd) {
+        for (T key : toAdd.map.keySet()) {
+            int addedCount = toAdd.map.get(key);
+            map.put(key, addedCount + map.getOrDefault(key, 0));
+            size += addedCount;
+        }
+    }
 }

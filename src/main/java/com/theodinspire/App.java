@@ -85,6 +85,9 @@ public class App
             unigram.add(second);
             bigram.add(first, second);
         }
+        
+        unigram.trimUnknowns(2);
+        bigram.trimUnknowns(2);
     
         unigram.close();
         bigram.close();

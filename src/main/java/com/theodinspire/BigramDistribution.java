@@ -53,8 +53,23 @@ public class BigramDistribution {
     public void trimUnknowns(int threshold) {
         Set<String> trimmed = firstsCounter.trimSmallCounts(threshold);
         
-        for (String key : map.keySet()) {
-            map.get(key).setUnknowns(trimmed);
+        WordCounter unknownFirst = new WordCounter();
+        
+        Set<String> keys = new HashSet<>(map.keySet());
+        
+        for (String key : keys) {
+            WordCounter keyedCounter = map.get(key);
+            keyedCounter.setUnknowns(trimmed);
+            
+            if (trimmed.contains(key)) {
+                unknownFirst.addCounts(keyedCounter);
+                map.remove(key);
+            }
+        }
+        
+        if (unknownFirst.size > 0) {
+            firstsCounter.map.put(WordCounter.unknownToken, unknownFirst.total());
+            map.put(WordCounter.unknownToken, unknownFirst);
         }
     }
     
@@ -62,10 +77,10 @@ public class BigramDistribution {
     
     ///
     public double probablilityOf(String first, String second) {
-        if (map.containsKey(first)) {
-            Counter<String> counter = map.get(first);
-            return (double) counter.getCount(second) / (double) counter.total();
-        } else return 0;
+        String fore = firstsCounter.getKeySet().contains(first) ? first : WordCounter.unknownToken;
+        String aft = map.keySet().contains(second) ? second : WordCounter.unknownToken;
+        
+        return (double) map.get(fore).getCount(aft) / (double) firstsCounter.getCount(fore);
     }
     
     public double probablilityOf(HasWord first, HasWord second) {
@@ -73,12 +88,13 @@ public class BigramDistribution {
     }
     
     public double probabilityLaplace(String first, String second) {
-        if (map.containsKey(first)) {
-            Counter<String> counter = map.get(first);
-            double num = counter.getCount(second) + 1;
-            double den = counter.total() + map.size();
-            return num / den;
-        } else return 0;
+        String fore = firstsCounter.getKeySet().contains(first) ? first : WordCounter.unknownToken;
+        String aft = map.keySet().contains(second) ? second : WordCounter.unknownToken;
+        
+        Counter<String> counter = map.get(fore);
+        double num = counter.getCount(aft) + 1;
+        double den = counter.total() + map.size();
+        return num / den;
     }
     
     public double probabilityLaplace(HasWord first, HasWord second) {
@@ -93,7 +109,7 @@ public class BigramDistribution {
         StringBuilder builder = new StringBuilder();
         
         for (String prime : firsts) {
-            Counter<String> counter = map.get(prime);
+            Counter<String> counter = map.getOrDefault(prime, map.get(WordCounter.unknownToken));
             List<String> seconds = counter.getKeysAsList();
             seconds.sort(Comparator.naturalOrder());
             

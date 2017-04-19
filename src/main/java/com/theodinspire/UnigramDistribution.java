@@ -47,6 +47,8 @@ public class UnigramDistribution {
     
     public double probabilityOf(String key) {
         if (counter.total() == 0) return 0;
+        else if (!counter.getKeySet().contains(key))
+            return (double) counter.getCount(WordCounter.unknownToken) / (double) counter.total();
         else return (double) counter.getCount(key) / (double) counter.total();
     }
     
@@ -63,7 +65,8 @@ public class UnigramDistribution {
         StringBuilder builder = new StringBuilder();
         
         for (String key : keys) {
-            builder.append(String.format("%16s : %f\n", key, probabilityOf(key)));
+            double prob = probabilityOf(key);
+            builder.append(String.format("%16s : %f\n", key, prob));
         }
         
         return builder.toString();

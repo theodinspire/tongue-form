@@ -78,9 +78,12 @@ public class BigramDistribution {
     ///
     public double probablilityOf(String first, String second) {
         String fore = firstsCounter.getKeySet().contains(first) ? first : WordCounter.unknownToken;
-        String aft = map.keySet().contains(second) ? second : WordCounter.unknownToken;
-        
-        return (double) map.get(fore).getCount(aft) / (double) firstsCounter.getCount(fore);
+        String aft = map.keySet().contains(second) || second == "</s>" ? second : WordCounter.unknownToken;
+    
+        Counter<String> counter = map.get(fore);
+        double num = counter.getCount(aft);
+        double den = counter.total();
+        return num / den;
     }
     
     public double probablilityOf(HasWord first, HasWord second) {
@@ -101,8 +104,7 @@ public class BigramDistribution {
         return probabilityLaplace(first.word(), second.word());
     }
     
-    @Override
-    public String toString() {
+    public String toVerboseString() {
         List<String> firsts = firstsCounter.getKeysAsList();
         firsts.sort(Comparator.naturalOrder());
         

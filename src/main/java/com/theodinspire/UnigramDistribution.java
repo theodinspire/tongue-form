@@ -56,8 +56,7 @@ public class UnigramDistribution {
         return probabilityOf(key.word());
     }
     
-    @Override
-    public String toString() {
+    public String toVerboseString() {
         List<String> keys = counter.getKeysAsList();
         
         keys.sort(Comparator.naturalOrder());

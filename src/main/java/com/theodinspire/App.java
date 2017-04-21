@@ -65,7 +65,7 @@ public class App
     }
     
     static void train(String filename) {
-        DocumentPreprocessor train = new DocumentPreprocessor(filename);
+        DocumentPreprocessor train = new DocumentPreprocessor(filename, DocumentPreprocessor.DocType.Plain, "UTF-8");
     
         for (List<HasWord> sentence : train) {
             HasWord first;
@@ -85,6 +85,12 @@ public class App
             unigram.add(second);
             bigram.add(first, second);
         }
+    
+        System.out.println("Token count: " + unigram.getN());
+        System.out.println("Vocabulary size: " + unigram.getUniqueN());
+        
+        unigram.trimUnknowns(5);
+        bigram.trimUnknowns(5);
     
         unigram.close();
         bigram.close();
@@ -140,9 +146,12 @@ public class App
                     first = second;
                     second = word;
                 
-                    uniLogProb += Math.log(unigram.probabilityOf(second));
-                    biLogProb += Math.log(bigram.probablilityOf(first, second));
-                    laplaceLog += Math.log(bigram.probabilityLaplace(first, second));
+                    if (uniLogProb != Double.NEGATIVE_INFINITY)
+                        uniLogProb += Math.log(unigram.probabilityOf(second));
+                    if (biLogProb != Double.NEGATIVE_INFINITY)
+                        biLogProb += Math.log(bigram.probablilityOf(first, second));
+                    if (laplaceLog != Double.NEGATIVE_INFINITY)
+                        laplaceLog += Math.log(bigram.probabilityLaplace(first, second));
                 }
             
                 uniLogProb += Math.log(unigram.probabilityOf(SentenceCap.ending()));

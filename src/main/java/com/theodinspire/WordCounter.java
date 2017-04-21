@@ -8,7 +8,7 @@ import java.util.Set;
  * Created by corms on 4/19/17.
  */
 public class WordCounter extends Counter<String> {
-    private static final String unknownToken = "<UNK>";
+    public static final String unknownToken = "<UNK>";
     
     public Set<String> trimSmallCounts(int threshold) {
         if (threshold <= 1) return new HashSet<>();
@@ -17,7 +17,9 @@ public class WordCounter extends Counter<String> {
         
         int unknownCount = 0;
         
-        for (String key : map.keySet()) {
+        Set<String> keys = new HashSet<>(map.keySet());
+        
+        for (String key : keys) {
             int keyCount = map.get(key);
             if (keyCount < threshold) {
                 unknownCount += keyCount;

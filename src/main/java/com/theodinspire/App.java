@@ -10,8 +10,9 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Hello world!
+ * Eric T Cormack
  *
+ * NLP Language Models
  */
 public class App 
 {
@@ -89,14 +90,14 @@ public class App
         System.out.println("Token count: " + unigram.getN());
         System.out.println("Vocabulary size: " + unigram.getUniqueN());
         
-        unigram.trimUnknowns(5);
-        bigram.trimUnknowns(5);
+        unigram.trimUnknowns(10);
+        bigram.trimUnknowns(10);
     
         unigram.close();
         bigram.close();
         
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("wordtypes-" + filename))) {
-            writer.write(unigram.toString());
+            writer.write(unigram.toVerboseString());
             writer.flush();
         } catch (Exception e) {
             System.out.println("Failed to write word-types");
@@ -104,7 +105,7 @@ public class App
         }
     
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("bigrams-" + filename))) {
-            writer.write(bigram.toString());
+            writer.write(bigram.toVerboseString());
             writer.flush();
         } catch (Exception e) {
             System.out.println("Failed to write bigrams");

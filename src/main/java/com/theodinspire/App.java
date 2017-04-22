@@ -13,6 +13,8 @@ import java.util.List;
  * Eric T Cormack
  *
  * NLP Language Models
+ *
+ * App, main class for assignment
  */
 public class App 
 {

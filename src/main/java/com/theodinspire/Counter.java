@@ -3,7 +3,11 @@ package com.theodinspire;
 import java.util.*;
 
 /**
- * Created by corms on 4/10/17.
+ * Eric T Cormack
+ *
+ * NLP Language Models
+ *
+ * Counter, an object that counts instances of things
  */
 public class Counter<T> {
     protected Map<T, Integer> map;

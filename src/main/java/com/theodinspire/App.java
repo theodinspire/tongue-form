@@ -6,6 +6,7 @@ import edu.stanford.nlp.process.DocumentPreprocessor;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
@@ -16,49 +17,49 @@ import java.util.List;
  *
  * App, main class for assignment
  */
-public class App 
+public class App
 {
     static String trainingText = "HG-train.txt";
     static String testingText = "HG-test.txt";
     static String output = "output-HG.txt";
-    
+
     static UnigramDistribution unigram = new UnigramDistribution();
     static BigramDistribution bigram = new BigramDistribution();
-    
+
     public static void main( String[] args ) {
         // Parse input string
         handleArgs(args);
-        
+
         // Train
         train(trainingText);
-        
+
         // Test and create output
         test(testingText, output);
     }
-    
+
     static void handleArgs(String[] args) {
         List<String> arguments = Arrays.asList(args);
-        
+
         if (arguments.contains("-h")) printHelpAndExit();
-        
+
         int inputIndex = arguments.indexOf("-i");
         int testIndex = arguments.indexOf("-t");
         int outputIndex = arguments.indexOf("-o");
-        
+
         if (inputIndex < 0 || inputIndex >= arguments.size())
             printHelpAndExit();
         else {
             trainingText = arguments.get(inputIndex + 1);
             if (trainingText.matches("-[itoh]")) printHelpAndExit();
         }
-        
+
         if (testIndex < 0 || testIndex >= arguments.size())
             printHelpAndExit();
         else {
             testingText = arguments.get(testIndex + 1);
             if (testingText.matches("-[itoh]")) printHelpAndExit();
         }
-        
+
         if (outputIndex < 0 || outputIndex >= arguments.size())
             output = "output-" + testingText;
         else {
@@ -66,89 +67,99 @@ public class App
             if (output.matches("-[itoh]")) printHelpAndExit();
         }
     }
-    
+
     static void train(String filename) {
         DocumentPreprocessor train = new DocumentPreprocessor(filename, DocumentPreprocessor.DocType.Plain, "UTF-8");
-    
+
+        System.out.println("Training the models\n");
         for (List<HasWord> sentence : train) {
             HasWord first;
             HasWord second = SentenceCap.beginning();
-        
+
             for (HasWord word : sentence) {
                 first = second;
                 second = word;
-            
+
                 unigram.add(second);
                 bigram.add(first, second);
             }
-        
+
             first = second;
             second = SentenceCap.ending();
-        
+
             unigram.add(second);
             bigram.add(first, second);
         }
-    
-        System.out.println("Token count: " + unigram.getN());
-        System.out.println("Vocabulary size: " + unigram.getUniqueN());
-        
+
+        //System.out.println("Token count: " + unigram.getN());
+        //System.out.println("Vocabulary size: " + unigram.getUniqueN());
+
+        System.out.println("Trimming low counts to unknowns in the Unigram model");
         unigram.trimUnknowns(10);
+        System.out.println("Trimming low counts to unknowns in the Bigram model\n");
         bigram.trimUnknowns(10);
-    
+
         unigram.close();
         bigram.close();
-        
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("wordtypes-" + filename))) {
-            writer.write(unigram.toVerboseString());
-            writer.flush();
-        } catch (Exception e) {
-            System.out.println("Failed to write word-types");
-            e.printStackTrace();
-        }
-    
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("bigrams-" + filename))) {
-            writer.write(bigram.toVerboseString());
-            writer.flush();
-        } catch (Exception e) {
-            System.out.println("Failed to write bigrams");
-            e.printStackTrace();
-        }
+
+        // try (BufferedWriter writer = new BufferedWriter(new FileWriter("wordtypes-" + filename))) {
+        //     writer.write(unigram.toVerboseString());
+        //     writer.flush();
+        // } catch (Exception e) {
+        //     System.out.println("Failed to write word-types");
+        //     e.printStackTrace();
+        // }
+
+        // try (BufferedWriter writer = new BufferedWriter(new FileWriter("bigrams-" + filename))) {
+        //     writer.write(bigram.toVerboseString());
+        //     writer.flush();
+        // } catch (Exception e) {
+        //     System.out.println("Failed to write bigrams");
+        //     e.printStackTrace();
+        // }
     }
-    
+
     static void printHelpAndExit() {
-        System.out.println("This is the help text");
-        
+        System.out.println("To execute this program, the input should be as follows:");
+        System.out.println("tongue-form.jar -i file -t file [-o file]");
+        System.out.println("where '-i' indicates the training corpus");
+        System.out.println("'-t' indicates the test corpus");
+        System.out.println("and the optional '-o' indicates the name of the output file.\n");
+        System.out.println("If '-o' is omitted, then the output will be put in a file whose");
+        System.out.println("name is 'output-' appended to the front of the test corpus' name");
+
         System.exit(0);
     }
-    
+
     static void test(String testFilename, String outFilename) {
         DocumentPreprocessor test = new DocumentPreprocessor(testFilename);
         int i = 0;
-    
+
+        System.out.println("Testing the models\n");
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(outFilename))) {
             for (List<HasWord> sentence : test) {
                 ++i;
-            
+
                 // Print sentence
                 writer.write("Sentence " + i + ": ");
                 sentence.forEach((a) -> {
                     try { writer.write(a + " "); }
                     catch (Exception e) { System.out.println("Oops, didn't write " + a); } });
                 writer.write("\n");
-            
+
                 // Initialize probability
                 double uniLogProb = 0;
                 double biLogProb = 0;
                 double laplaceLog = 0;
-            
+
                 // Initalize words
                 HasWord first;
                 HasWord second = SentenceCap.beginning();
-            
+
                 for (HasWord word : sentence) {
                     first = second;
                     second = word;
-                
+
                     if (uniLogProb != Double.NEGATIVE_INFINITY)
                         uniLogProb += Math.log(unigram.probabilityOf(second));
                     if (biLogProb != Double.NEGATIVE_INFINITY)
@@ -156,28 +167,29 @@ public class App
                     if (laplaceLog != Double.NEGATIVE_INFINITY)
                         laplaceLog += Math.log(bigram.probabilityLaplace(first, second));
                 }
-            
+
                 uniLogProb += Math.log(unigram.probabilityOf(SentenceCap.ending()));
                 biLogProb += Math.log(bigram.probablilityOf(second, SentenceCap.ending()));
                 laplaceLog += Math.log(bigram.probabilityLaplace(second, SentenceCap.ending()));
-                
+
                 double uniPerpPower = -1 / ((double) sentence.size() + 1);
                 double biPerpPower = uniPerpPower;
-            
+
                 double uniProb = Math.exp(uniLogProb);
                 double biProb = Math.exp(biLogProb);
                 double laplace = Math.exp(laplaceLog);
-            
+
                 double uniPerp = Math.pow(uniProb, uniPerpPower);
                 double biPerp = Math.pow(biProb, biPerpPower);
                 double laPlerp = Math.pow(laplace, biPerpPower);
-            
+
                 writer.write(String.format(" - unigram [Prob] %-16G [Perp] %-16G\n", uniProb, uniPerp));
                 writer.write(String.format(" - bigram  [Prob] %-16G [Perp] %-16G\n", biProb, biPerp));
                 writer.write(String.format(" - laplace [Prob] %-16G [Perp] %-16G\n\n", laplace, laPlerp));
-            
+
                 writer.flush();
             }
+            System.out.println("Output saved to: " + Paths.get(outFilename).toAbsolutePath() + "\n");
         } catch (IOException io) {
             System.out.println("Could not write output file");
             io.printStackTrace();

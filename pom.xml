@@ -49,6 +49,7 @@
             <descriptorRef>jar-with-dependencies</descriptorRef>
           </descriptorRefs>
           <finalName>tongue-form</finalName>
+          <appendAssemblyId>false</appendAssemblyId>
           <archive>
             <manifest>
               <mainClass>com.theodinspire.App</mainClass>

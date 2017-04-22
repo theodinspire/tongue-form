@@ -6,7 +6,11 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * Created by corms on 4/10/17.
+ * Eric T Cormack
+ *
+ * NLP Language Models
+ *
+ * UnigramDistribution, an object to handle the language modelling of the Unigram model
  */
 public class UnigramDistribution {
     private WordCounter counter;

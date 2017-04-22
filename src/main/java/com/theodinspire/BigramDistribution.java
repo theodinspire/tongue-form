@@ -5,7 +5,11 @@ import edu.stanford.nlp.ling.HasWord;
 import java.util.*;
 
 /**
- * Created by corms on 4/12/17.
+ * Eric T Cormack
+ *
+ * NLP Language Models
+ *
+ * BigramDistribution, a class for handing the Bigram language model
  */
 public class BigramDistribution {
     private Map<String, WordCounter> map;

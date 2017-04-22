@@ -1,11 +1,14 @@
 package com.theodinspire;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Created by corms on 4/19/17.
+ * Eric T Cormack
+ *
+ * NLP Language Models
+ *
+ * WordCounter, for counting words and trimming unknowns
  */
 public class WordCounter extends Counter<String> {
     public static final String unknownToken = "<UNK>";

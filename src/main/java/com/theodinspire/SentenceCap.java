@@ -3,12 +3,20 @@ package com.theodinspire;
 import edu.stanford.nlp.ling.HasWord;
 
 /**
- * Created by corms on 4/13/17.
+ * Eric T Cormack
+ *
+ * NLP Language Models
+ *
+ * SentenceCap, to implements Stanford's HasWord interface for the ends of sentences
  */
+
 public class SentenceCap implements HasWord {
     private String item;
     
     private SentenceCap(String cap) { item = cap; }
+    
+    @Override
+    public String toString() { return word(); }
     
     @Override
     public String word() { return item; }
